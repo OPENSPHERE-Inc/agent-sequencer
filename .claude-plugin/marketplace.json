@@ -1,0 +1,22 @@
+{
+  "name": "agent-sequencer",
+  "owner": {
+    "name": "OPENSPHERE Inc.",
+    "url": "https://github.com/OPENSPHERE-Inc"
+  },
+  "plugins": [
+    {
+      "name": "agent-sequencer",
+      "source": ".",
+      "description": "Claude Code skill + MCP server for step-driving AI agents through classical sequencer programs.",
+      "homepage": "https://github.com/OPENSPHERE-Inc/agent-sequencer",
+      "license": "MIT",
+      "keywords": [
+        "mcp",
+        "ai-agent",
+        "workflow",
+        "sequencer"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: pytest (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Sync dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Run pytest
+        run: uv run pytest -v
+
+      - name: Verify CLI entry point
+        run: uv run agent-sequencer --help
+
+  install-from-git:
+    name: Install from git (smoke test)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+
+      - name: Install agent-sequencer from local checkout via uv tool
+        # uv tool install treats the source as if cloned from a remote git repo.
+        # This validates that pyproject.toml + src/ layout produces a runnable wheel
+        # that uvx / uv tool install can consume — the same path used for
+        # public git distribution (uvx --from git+https://...).
+        run: uv tool install ./source
+
+      - name: Verify entry point works after install
+        run: agent-sequencer --help

@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "agent-sequencer": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}",
+        "agent-sequencer",
+        "--watch"
+      ],
+      "env": {
+        "AGENT_SEQUENCER_PROGRAMS_DIR": "${CLAUDE_PLUGIN_ROOT}/skills/agent-sequencer/programs",
+        "VIRTUAL_ENV": "",
+        "UV_LINK_MODE": "copy"
+      }
+    }
+  }
+}

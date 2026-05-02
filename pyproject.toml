@@ -1,0 +1,50 @@
+[project]
+name = "agent-sequencer"
+version = "0.1.0"
+description = "MCP server that step-drives AI agents through classical programs (sequencer programs), the way a debugger drives a process."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OPENSPHERE Inc." },
+]
+keywords = ["mcp", "claude-code", "ai-agent", "workflow", "sequencer"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "jsonschema>=4.0",
+]
+
+[project.scripts]
+agent-sequencer = "agent_sequencer.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/OPENSPHERE-Inc/agent-sequencer"
+Repository = "https://github.com/OPENSPHERE-Inc/agent-sequencer"
+Issues = "https://github.com/OPENSPHERE-Inc/agent-sequencer/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_sequencer"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

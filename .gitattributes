@@ -1,0 +1,25 @@
+# Default: text files use LF in repo, native on checkout (no auto-conversion warning)
+* text=auto eol=lf
+
+# Explicitly text
+*.py     text eol=lf
+*.md     text eol=lf
+*.json   text eol=lf
+*.toml   text eol=lf
+*.yaml   text eol=lf
+*.yml    text eol=lf
+*.ini    text eol=lf
+*.sh     text eol=lf
+*.cfg    text eol=lf
+
+# Windows-only scripts
+*.ps1    text eol=crlf
+*.bat    text eol=crlf
+
+# Binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.lock   binary

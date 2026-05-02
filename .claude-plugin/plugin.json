@@ -1,0 +1,20 @@
+{
+  "name": "agent-sequencer",
+  "version": "0.1.0",
+  "description": "Claude Code skill + MCP server that step-drives AI agents through classical programs (sequencer programs), the way a debugger drives a process.",
+  "author": {
+    "name": "OPENSPHERE Inc.",
+    "url": "https://github.com/OPENSPHERE-Inc"
+  },
+  "homepage": "https://github.com/OPENSPHERE-Inc/agent-sequencer",
+  "repository": "https://github.com/OPENSPHERE-Inc/agent-sequencer",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "ai-agent",
+    "workflow",
+    "sequencer",
+    "deterministic",
+    "review"
+  ]
+}
