@@ -354,8 +354,8 @@ assert driver.last_yield["kind"] == KIND_DONE
 assert driver.last_yield["summary"]["..."] == ...
 ```
 
-参考: agent-sequencer の開発時には、このスタイルで `test_step8.py` が書かれていました
-（履歴上のコミット `30facb9` 直前のテストファイルを参照）。
+参考: 動作する実例としてリポジトリの `tests/test_hello.py` および
+`tests/test_review_rounds.py` を参照してください。
 
 ## 12. 公開前チェックリスト
 
