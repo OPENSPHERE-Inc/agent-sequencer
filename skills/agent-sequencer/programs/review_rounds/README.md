@@ -1,5 +1,7 @@
 # review_rounds — Review-and-fix bundle for sequencer programs
 
+*[日本語版](README_ja.md)*
+
 This is an **official feature bundle** that runs a parallel review of an
 agent-sequencer sequencer program (and surrounding Python code) using
 three expert agents, then iterates triage -> estimate -> fix ->

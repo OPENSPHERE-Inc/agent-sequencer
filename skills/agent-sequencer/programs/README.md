@@ -1,5 +1,7 @@
 # Sequencer program directory (bundled with the plugin)
 
+*[日本語版](README_ja.md)*
+
 This directory holds the sequencer programs bundled with the plugin.
 
 ## Search path priority

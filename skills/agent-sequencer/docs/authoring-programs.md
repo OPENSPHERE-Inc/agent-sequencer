@@ -1,5 +1,7 @@
 # Sequencer Program Author's Guide
 
+*[日本語版](authoring-programs_ja.md)*
+
 This document is a guide for anyone creating or modifying **sequencer programs**
 (classical programs written as Python generators) for agent-sequencer.
 

@@ -1,5 +1,7 @@
 # agent-sequencer skill
 
+*[日本語版 README](README_ja.md)*
+
 An MCP skill that drives an AI agent as a step-execution debugger for a classical program
 (a sequencer program written as a Python generator).
 
