@@ -53,6 +53,7 @@ as conversation context degrades over long-running tasks.
 - **Invoke it from an AI agent (Claude Code) via MCP tools** — `sequencer_list_programs`
   to discover, `sequencer_start` to launch, `sequencer_next` to submit a result,
   `sequencer_resume` to recover an interrupted instance.
+  Full tool list: [`skills/agent-sequencer/README.md`](skills/agent-sequencer/README.md#mcp-tool-list)
 - **Stable execution of long-running workflows** — every step's response is validated
   against a JSON Schema with automatic retry on violation; interruptions and post-compact
   desyncs recover via deterministic replay of a JSONL event log; `--watch` hot-reloads

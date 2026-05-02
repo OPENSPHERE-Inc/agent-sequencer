@@ -50,7 +50,8 @@
   向けガイド: [`docs/authoring-programs_ja.md`](skills/agent-sequencer/docs/authoring-programs_ja.md)
 - **AI エージェント (Claude Code) から MCP ツールで呼び出す** —
   `sequencer_list_programs` でプログラム一覧、`sequencer_start` で起動、
-  `sequencer_next` で結果投函、`sequencer_resume` で中断インスタンスの復旧
+  `sequencer_next` で結果投函、`sequencer_resume` で中断インスタンスの復旧。
+  全ツール一覧: [`skills/agent-sequencer/README_ja.md`](skills/agent-sequencer/README_ja.md#mcp-ツール一覧)
 - **長時間ワークフローの安定実行** — JSON Schema で各ステップの応答を厳密検証し、
   違反は自動リトライ。interrupt / compact 後も JSONL の決定論的再生で完全復旧。
   `--watch` でプログラム編集をホットリロード
