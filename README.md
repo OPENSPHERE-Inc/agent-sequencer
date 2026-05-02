@@ -2,10 +2,41 @@
 
 *[日本語版 README](README_ja.md)*
 
-> **An MCP skill + server that drives an AI agent like a debugger driving a process, stepping it through a classical program (a Python generator).**
+**An MCP skill + server that lets a Python script drive an AI agent through
+strictly-defined workflows and long-running tasks.**
 
-The truth of the logic stays on the **program side**, while the AI acts purely as the **driver**.
-Because guardrails live in code rather than in prompts, the system is resilient to context degradation across long-running tasks.
+```
++--------------+    MCP tool call     +-------------------------------+
+|              | -------------------> |       agent-sequencer         |
+|   AI Agent   |                      |     (MCP stdio server)        |
+| (Claude Code)| <------------------- |                               |
+|              |    yield Instruction |  +-------------------------+  |
++------+-------+                      |  |   Sequencer Program     |  |
+       |                              |  |   (Python generator)    |  |
+       | step execution via own tools |  |   branching / control   |  |
+       | (Bash / Edit / Skill / ...)  |  +-------------------------+  |
+       v                              |                               |
+     User                             |  +-------------------------+  |
+                                      |  |   JSONL event log       |  |
+                                      |  |   (deterministic replay)|  |
+                                      |  +-------------------------+  |
+                                      +-------------------------------+
+```
+
+## Architecture overview
+
+- **Sequencer program**: a classical program written as a Python generator.
+  Workflow branching, aggregation, and termination logic stay inside the program.
+- **Step boundary**: each `yield Instruction(...)` in the program is one step.
+  It declares an instruction text plus a JSON Schema for the response; the AI agent
+  executes the instruction with its own tools (Bash / Edit / Skill / ...) and returns
+  the result as JSON.
+- **Deterministic replay**: every event is appended to a JSONL log; after a server
+  restart, an interrupt, or a context compaction, the program is fully recoverable
+  by re-running it from the start and re-injecting the recorded inputs.
+
+Because guardrails live in **code** rather than in prompts, the system stays stable
+as conversation context degrades over long-running tasks.
 
 - **Supported editors**: Claude Code
 - **Language / runtime**: Python ≥ 3.11
