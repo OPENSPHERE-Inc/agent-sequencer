@@ -1,6 +1,6 @@
 {
   "name": "agent-sequencer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Claude Code skill + MCP server that step-drives AI agents through classical programs (sequencer programs), the way a debugger drives a process.",
   "author": {
     "name": "OPENSPHERE Inc.",
