@@ -251,7 +251,6 @@ Programs are searched in the following order (first match wins):
 
 ## Limitations (v1)
 
-- The feedback re-fix loop (review-respond → review-resolve, repeated up to 3 times) is not yet implemented.
 - `ParallelInstructions` (in-program fan-out declarations) is not yet implemented.
 - HTTP/SSE transport (sharing across multiple Claude Code sessions) is not yet implemented.
 - Program sandboxing (stronger trust boundary) is not yet implemented.

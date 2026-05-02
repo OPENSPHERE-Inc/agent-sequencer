@@ -95,7 +95,6 @@ returned, and the agent reports this to the user.
 
 ## Limitations (v1)
 
-- Feedback re-fix loops (review-respond → review-resolve, up to 3 iterations) are not implemented.
 - `ParallelInstructions` (in-program fan-out declarations) are not implemented.
 - HTTP/SSE transport (sharing across multiple Claude Code sessions) is not implemented.
 - Program sandboxing (stronger trust boundaries) is not implemented.

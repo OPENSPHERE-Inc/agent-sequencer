@@ -245,7 +245,6 @@ agent-sequencer/
 
 ## 制限事項（v1）
 
-- フィードバック再修正ループ（review-respond → review-resolve の最大 3 回繰り返し）は未実装
 - `ParallelInstructions`（プログラム内ファンアウト宣言）は未実装
 - HTTP/SSE トランスポート（複数 Claude Code セッション間で共有）は未実装
 - プログラムサンドボックス（信頼境界の強化）は未実装
