@@ -12,7 +12,8 @@ Decision logic is contained within the program, and the agent acts purely as a d
 
 | name | Overview |
 |---|---|
-| `review-rounds` | Reviews agent-sequencer's own source code with python-sensei, then responds and verifies, iterating up to N rounds until convergence |
+| `hello` | Minimal sample / smoke-test program. Greets each name in `params["names"]` (default `["world"]`) one at a time |
+| `review-rounds` | Self-review helper for sequencer programs. Three specialists (python-sensei / sequencer-sensei / prompt-sensei) review → respond → verify, iterating up to N rounds until convergence |
 
 For how to write new programs, see [`docs/authoring-programs.md`](docs/authoring-programs.md).
 

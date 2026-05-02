@@ -16,12 +16,24 @@ Because guardrails live in code rather than in prompts, the system is resilient 
 
 ## Features
 
-- When you have an AI run a long, multi-step task, the **outer-loop decisions stay in the program** and the AI only executes individual steps.
-- Recovery from schema violations, interruptions, and post-compact desynchronization is handled by **JSONL event logs + deterministic replay**.
-- The bundled `review-rounds` program reviews → fixes → verifies your own sequencer programs using three specialist agents (python-sensei / sequencer-sensei / prompt-sensei).
+- **Author your own sequencer program in Python** — keep workflow branching, aggregation,
+  and termination logic in code, and delegate per-step execution to the AI agent.
+  Author's guide: [`docs/authoring-programs.md`](skills/agent-sequencer/docs/authoring-programs.md).
+- **Invoke it from an AI agent (Claude Code) via MCP tools** — `sequencer_list_programs`
+  to discover, `sequencer_start` to launch, `sequencer_next` to submit a result,
+  `sequencer_resume` to recover an interrupted instance.
+- **Stable execution of long-running workflows** — every step's response is validated
+  against a JSON Schema with automatic retry on violation; interruptions and post-compact
+  desyncs recover via deterministic replay of a JSONL event log; `--watch` hot-reloads
+  program edits during development.
 
-For details, see [`skills/agent-sequencer/SKILL.md`](skills/agent-sequencer/SKILL.md) and
-[`skills/agent-sequencer/docs/authoring-programs.md`](skills/agent-sequencer/docs/authoring-programs.md).
+For details, see [`skills/agent-sequencer/SKILL.md`](skills/agent-sequencer/SKILL.md) (driving rules) and
+[`skills/agent-sequencer/docs/authoring-programs.md`](skills/agent-sequencer/docs/authoring-programs.md) (program author's guide).
+
+For your own programs, the bundled
+[`review-rounds`](skills/agent-sequencer/programs/review_rounds/README.md)
+program (three specialist agents review → fix → verify in parallel) is available as a
+self-review helper — and as a sample implementation to crib from.
 
 ---
 
@@ -72,20 +84,29 @@ separate `.claude/.mcp.json` or set the relevant environment variables (see
 
 Once the plugin is enabled in Claude Code, you can ask in natural language:
 
-### A. Specify a program by name
+For a first run, the bundled `hello` program (a minimal sample / smoke test) is the
+quickest way to verify the wiring.
+
+### A. Specify a program by name (smoke test)
 
 ```
-Run the review-rounds program with agent-sequencer
-(max_rounds=3, base=main)
+Start the hello program with agent-sequencer
+(names=["Alice", "Bob"])
 ```
 
-### B. Describe what you want
+The agent looks the program up via `sequencer_list_programs`, calls
+`sequencer_start program="hello" params={"names": ["Alice", "Bob"]}`, generates a one-line
+greeting per name, submits each result with `sequencer_next`, and finally calls
+`sequencer_close`.
+
+### B. Describe what you want (your own program)
 
 ```
-Use agent-sequencer to review and fix src/my_program.py
+Run my-workflow with agent-sequencer
 ```
 
-The agent will automatically follow the flow `sequencer_list_programs` → `sequencer_start` → drive loop → `sequencer_close`.
+The agent picks the matching program (e.g. one you placed under
+`<cwd>/.claude/sequencer/programs/my_workflow.py`) and starts it.
 
 ### C. Resume an interrupted instance
 

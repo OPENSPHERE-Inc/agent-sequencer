@@ -21,7 +21,8 @@ and plugin install live in different locations).
 
 | File | Name | Overview |
 |---|---|---|
-| `review_rounds.py` | `review-rounds` | Reviews a sequencer program with three specialists (python-sensei / sequencer-sensei / prompt-sensei), then responds and verifies, iterating up to N rounds until convergence |
+| `hello.py` | `hello` | Minimal sample / smoke-test program. Greets each name in `params["names"]` (default `["world"]`) one at a time. Useful as a starting point for new program authors and for verifying that agent-sequencer is wired up correctly. |
+| `review_rounds.py` | `review-rounds` | Reviews a sequencer program with three specialists (python-sensei / sequencer-sensei / prompt-sensei), then responds and verifies, iterating up to N rounds until convergence. Useful as a self-review helper for your own sequencer programs. |
 
 The skills, agents, and scripts that `review_rounds.py` references are self-contained
 in the adjacent `review_rounds/` directory. See its

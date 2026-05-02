@@ -1,9 +1,40 @@
 # agent-sequencer
 
-> **AI エージェントが古典プログラム（Python ジェネレータ）をステップ実行するデバッガとして駆動する MCP スキル + サーバ**
+*[English README](README.md)*
 
-ロジックの真実は **プログラム側** に閉じ、AI は **ドライバ役** に徹します。
-ガードレールはプロンプトではなくコードに閉じるため、長時間タスクのコンテキスト劣化に耐性があります。
+**Python スクリプトで AI エージェントを制御し、厳密なワークフローに沿ったタスクや
+長時間タスクを実行させる MCP スキル + サーバ。**
+
+```
++--------------+    MCP tool call     +-------------------------------+
+|              | -------------------> |       agent-sequencer         |
+|   AI Agent   |                      |     (MCP stdio server)        |
+| (Claude Code)| <------------------- |                               |
+|              |    yield Instruction |  +-------------------------+  |
++------+-------+                      |  |   Sequencer Program     |  |
+       |                              |  |   (Python generator)    |  |
+       | step execution via own tools |  |   branching / control   |  |
+       | (Bash / Edit / Skill / ...)  |  +-------------------------+  |
+       v                              |                               |
+     User                             |  +-------------------------+  |
+                                      |  |   JSONL event log       |  |
+                                      |  |   (deterministic replay)|  |
+                                      |  +-------------------------+  |
+                                      +-------------------------------+
+```
+
+## アーキテクチャ概要
+
+- **シーケンサプログラム**: Python ジェネレータで書く古典プログラム。
+  ワークフローの分岐 / 集計 / 終了判定はここに閉じる。
+- **ステップ境界**: プログラム内の `yield Instruction(...)` が 1 ステップに相当。
+  指示文と JSON Schema 応答スキーマを宣言し、AI エージェントが自身のツール
+  （Bash / Edit / Skill / ...）で実行 → JSON で結果を返す。
+- **決定論的再生**: 全イベントを JSONL に追記し、サーバ再起動 / interrupt /
+  compact 後もプログラムを最初から再実行 + 記録済み入力を再注入することで完全復旧。
+
+ガードレールがプロンプトではなく **コード** に置かれるため、長時間タスクのコンテキスト
+劣化に対して安定します。
 
 - **対応エディタ**: Claude Code
 - **言語 / ランタイム**: Python ≥ 3.11
@@ -14,12 +45,24 @@
 
 ## できること
 
-- AI に「複数ステップの長時間タスク」を実行させる際、**外側ループの判断はプログラム** に閉じ、AI には各ステップの実行だけを任せる
-- スキーマ違反 / 中断 / compact 後の再同期に対して **JSONL イベントログ + 決定論的再生** で復旧可能
-- スキル同梱の `review-rounds` プログラムで、自分のシーケンサプログラムを 3 体の専門家エージェント（python-sensei / sequencer-sensei / prompt-sensei）でレビュー → 修正 → 検証
+- **Python でシーケンサプログラムを書く** — ワークフローの分岐 / 集計 / 終了判定を
+  プログラムに閉じ、各ステップの実行は AI エージェントに委譲できる。プログラム作者
+  向けガイド: [`docs/authoring-programs_ja.md`](skills/agent-sequencer/docs/authoring-programs_ja.md)
+- **AI エージェント (Claude Code) から MCP ツールで呼び出す** —
+  `sequencer_list_programs` でプログラム一覧、`sequencer_start` で起動、
+  `sequencer_next` で結果投函、`sequencer_resume` で中断インスタンスの復旧
+- **長時間ワークフローの安定実行** — JSON Schema で各ステップの応答を厳密検証し、
+  違反は自動リトライ。interrupt / compact 後も JSONL の決定論的再生で完全復旧。
+  `--watch` でプログラム編集をホットリロード
 
-詳しくは [`skills/agent-sequencer/SKILL.md`](skills/agent-sequencer/SKILL.md) と
-[`skills/agent-sequencer/docs/authoring-programs.md`](skills/agent-sequencer/docs/authoring-programs.md) を参照。
+詳しくは [`SKILL.md`](skills/agent-sequencer/SKILL.md)（駆動ルール）と
+[`docs/authoring-programs_ja.md`](skills/agent-sequencer/docs/authoring-programs_ja.md)
+（プログラム作者ガイド）を参照。
+
+なお、自作プログラムの動作確認 / 自己レビュー用ヘルパーとして
+[`review-rounds`](skills/agent-sequencer/programs/review_rounds/README_ja.md)
+プログラム（3 体の専門家エージェントで並列レビュー → 修正 → 検証を繰り返す）を
+同梱しています — 自作プログラムのサンプル実装としても参照できます。
 
 ---
 
@@ -67,23 +110,28 @@ uv run agent-sequencer --help
 
 ## クイックスタート
 
-Claude Code でプラグインを有効にしたら、自然言語で依頼できます:
+Claude Code でプラグインを有効にしたら、自然言語で依頼できます。動作確認には
+同梱の `hello` プログラム（最小サンプル / スモークテスト）が便利です。
 
-### A. プログラム名を指定
-
-```
-review-rounds プログラムを agent-sequencer で回してください
-（max_rounds=3, base=main）
-```
-
-### B. やりたい内容で依頼
+### A. プログラム名を指定（動作確認）
 
 ```
-agent-sequencer で src/my_program.py をレビュー＆修正してください
+hello プログラムを agent-sequencer で起動してください
+（names=["Alice", "Bob"]）
 ```
 
-エージェントが `sequencer_list_programs` → `sequencer_start` → 駆動ループ → `sequencer_close`
-の流れを自動で進めます。
+エージェントは `sequencer_list_programs` で一覧を確認 → `sequencer_start program="hello"
+params={"names": ["Alice", "Bob"]}` で起動 → 各名前への挨拶を 1 ステップずつ生成して
+`sequencer_next` で投函し、最後に `sequencer_close` で解放します。
+
+### B. やりたい内容で依頼（自作プログラム）
+
+```
+agent-sequencer で my-workflow プログラムを動かしてください
+```
+
+`<cwd>/.claude/sequencer/programs/my_workflow.py` 等に置いた自作プログラムを呼び出せます。
+エージェントが `sequencer_list_programs` で確認し、適切なプログラムを選んで起動します。
 
 ### C. 中断したインスタンスを再開
 
