@@ -66,7 +66,6 @@ class EventLog:
         self._fp = None
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        # "a" is append mode; the file is created automatically if missing.
         self._fp = self.path.open("a", encoding="utf-8")
 
     def append(self, event: dict[str, Any]) -> None:

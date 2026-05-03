@@ -81,12 +81,6 @@ PARAMS_SCHEMA = {
     },
 }
 
-# Path to the program bundle.
-# The bundle is self-contained in the review_rounds/ directory adjacent to
-# review_rounds.py, so resolving via __file__ yields an absolute path that
-# does not depend on the plugin install location.
-# Evaluated once at module load, so the result is deterministic
-# (immutable within a single installation).
 _BUNDLE = (Path(__file__).resolve().parent / "review_rounds").as_posix()
 
 _REVIEW_SKILL = f"{_BUNDLE}/skills/sequencer-review.md"
@@ -97,8 +91,6 @@ _PYTHON_SENSEI = f"{_BUNDLE}/agents/python-sensei.md"
 _SEQUENCER_SENSEI = f"{_BUNDLE}/agents/sequencer-sensei.md"
 _PROMPT_SENSEI = f"{_BUNDLE}/agents/prompt-sensei.md"
 
-# expect_schema definitions for each Instruction (collected at the top of the
-# file so they are easy to follow during review).
 _REVIEW_SCHEMA = {
     "type": "object",
     "properties": {
@@ -129,15 +121,7 @@ _RESOLVE_SCHEMA = {
     "additionalProperties": True,
 }
 
-# ----------------------------------------------------------------------
-# Instruction templates
-# ----------------------------------------------------------------------
-# Prompts are read only by the AI agent, so markdown decoration
-# (h1/h2 headings, blank-line paragraphs) is kept to a minimum.
-# However, in source the templates use textwrap.dedent + triple-quoted
-# strings to keep them readable.
-# Because format() is used for substitution, JSON sample braces are
-# escaped as {{ }}.
+# Instruction templates. JSON sample braces use {{ }} to survive str.format().
 
 _TPL_REVIEW = textwrap.dedent("""\
     [Round {round_num}/{max_rounds} Step 1: sequencer-review]
