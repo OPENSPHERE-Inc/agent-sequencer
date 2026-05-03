@@ -240,14 +240,17 @@ agent-sequencer/
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `AGENT_SEQUENCER_PROGRAMS_DIR` | Additional program search path (highest priority) | (unset) |
+| `AGENT_SEQUENCER_PROGRAMS_DIR` | Additional program search path appended as the lowest-priority fallback (used by plugins to ship bundled programs) | (unset) |
 | `AGENT_SEQUENCER_STATE_DIR` | Directory for JSONL event logs | `~/.claude/sequencer/state/` |
 
 Programs are searched in the following order (first match wins):
 
-1. `$AGENT_SEQUENCER_PROGRAMS_DIR`
-2. `<cwd>/.claude/sequencer/programs/`
-3. `~/.claude/sequencer/programs/`
+1. `<cwd>/.claude/sequencer/programs/`
+2. `~/.claude/sequencer/programs/`
+3. `$AGENT_SEQUENCER_PROGRAMS_DIR`
+
+Placing it last means a project-specific or user-wide program with the same `NAME`
+transparently overrides the plugin-bundled copy.
 
 ---
 

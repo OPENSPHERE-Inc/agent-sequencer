@@ -254,9 +254,12 @@ The full guide is `skills/agent-sequencer/docs/authoring-programs.md`. The non-n
 5. **Do not pickle generators**. State is recovered through deterministic replay.
 6. **Search-path resolution**: tier 3 (auto-derived "skill-root/programs") was removed in
    the public-repo restructure. Bundled programs are now passed via the
-   `AGENT_SEQUENCER_PROGRAMS_DIR` env var (set by the plugin's `.mcp.json`). Don't
-   reintroduce a `__file__`-based fallback in `__main__.py` — it can't span PyPI vs.
-   plugin install layouts.
+   `AGENT_SEQUENCER_PROGRAMS_DIR` env var (set by the plugin's `.mcp.json`) and are
+   appended **last** in the search list, so a project-specific
+   (`<cwd>/.claude/sequencer/programs/`) or user-wide
+   (`~/.claude/sequencer/programs/`) program with the same `NAME` transparently overrides
+   the plugin-bundled copy. Don't reintroduce a `__file__`-based fallback in
+   `__main__.py` — it can't span PyPI vs. plugin install layouts.
 
 ### Naming conventions
 

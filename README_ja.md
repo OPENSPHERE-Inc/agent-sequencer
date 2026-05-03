@@ -233,14 +233,17 @@ agent-sequencer/
 
 | 変数 | 用途 | 既定 |
 |---|---|---|
-| `AGENT_SEQUENCER_PROGRAMS_DIR` | 追加のプログラム探索パス（最優先） | （未設定） |
+| `AGENT_SEQUENCER_PROGRAMS_DIR` | 追加のプログラム探索パス（最低優先度のフォールバック。プラグインが同梱プログラムを公開するために使用） | （未設定） |
 | `AGENT_SEQUENCER_STATE_DIR` | JSONL イベントログの配置ディレクトリ | `~/.claude/sequencer/state/` |
 
 プログラム探索は次の順（先勝ち）:
 
-1. `$AGENT_SEQUENCER_PROGRAMS_DIR`
-2. `<cwd>/.claude/sequencer/programs/`
-3. `~/.claude/sequencer/programs/`
+1. `<cwd>/.claude/sequencer/programs/`
+2. `~/.claude/sequencer/programs/`
+3. `$AGENT_SEQUENCER_PROGRAMS_DIR`
+
+末尾配置にすることで、同じ `NAME` のプロジェクト固有プログラム／ユーザー全体プログラムが
+プラグイン同梱版を透過的に上書きできます。
 
 ---
 

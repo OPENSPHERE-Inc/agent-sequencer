@@ -8,14 +8,16 @@ This directory holds the sequencer programs bundled with the plugin.
 
 `registry.py` searches for programs in the following order (first match wins):
 
-1. `$AGENT_SEQUENCER_PROGRAMS_DIR` (environment variable)
-2. `<cwd>/.claude/sequencer/programs/` (project-specific)
-3. `~/.claude/sequencer/programs/` (user-wide)
+1. `<cwd>/.claude/sequencer/programs/` (project-specific)
+2. `~/.claude/sequencer/programs/` (user-wide)
+3. `$AGENT_SEQUENCER_PROGRAMS_DIR` (environment variable)
 
 This directory (`skills/agent-sequencer/programs/`), bundled with the plugin, is
 **specified by the plugin's `.mcp.json` via `AGENT_SEQUENCER_PROGRAMS_DIR`**.
 It is not part of the MCP server's automatic search path (because the PyPI install
-and plugin install live in different locations).
+and plugin install live in different locations). Because the env-var entry sits at
+the lowest priority, a program with the same `NAME` placed under a project-specific
+or user-wide path transparently overrides the bundled copy.
 
 ## Bundled programs
 

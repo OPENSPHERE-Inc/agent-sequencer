@@ -9,9 +9,11 @@ CLI:
              sequencer_list_programs / sequencer_start / sequencer_resume).
 
 Environment variables:
-  AGENT_SEQUENCER_PROGRAMS_DIR  Additional program search path (highest
-                                priority). Excluded from the search list
-                                when unset.
+  AGENT_SEQUENCER_PROGRAMS_DIR  Additional program search path appended as
+                                the lowest-priority fallback (used by
+                                plugins to ship bundled programs that user
+                                / project paths can override). Excluded
+                                from the search list when unset.
   AGENT_SEQUENCER_STATE_DIR     Directory where JSONL event logs are stored.
                                 Defaults to ~/.claude/sequencer/state/.
 """
@@ -91,25 +93,27 @@ def _resolve_search_paths() -> list[Path]:
     """Build the program search path list (first-match-wins order).
 
     Priority:
-      1. $AGENT_SEQUENCER_PROGRAMS_DIR     (bundled programs / dev override)
-      2. <cwd>/.claude/sequencer/programs/ (project-specific)
-      3. ~/.claude/sequencer/programs/     (user-wide)
+      1. <cwd>/.claude/sequencer/programs/ (project-specific)
+      2. ~/.claude/sequencer/programs/     (user-wide)
+      3. $AGENT_SEQUENCER_PROGRAMS_DIR     (bundled programs / dev override)
 
     The plugin-bundled programs/ directory is supplied via
-    AGENT_SEQUENCER_PROGRAMS_DIR by the plugin's .mcp.json. The MCP server
-    does not walk from its own install location to the plugin install
-    directory (PyPI install and plugin install live in different places).
+    AGENT_SEQUENCER_PROGRAMS_DIR by the plugin's .mcp.json. It is appended
+    last so a user-wide or project-specific program with the same NAME
+    transparently overrides the plugin-bundled copy. The MCP server does
+    not walk from its own install location to the plugin install directory
+    (PyPI install and plugin install live in different places).
 
     Non-existent paths are skipped by ProgramRegistry.
     """
     paths: list[Path] = []
 
+    paths.append((Path.cwd() / ".claude" / "sequencer" / "programs").resolve())
+    paths.append((Path.home() / ".claude" / "sequencer" / "programs").resolve())
+
     env_dir = os.environ.get("AGENT_SEQUENCER_PROGRAMS_DIR")
     if env_dir:
         paths.append(Path(env_dir).expanduser().resolve())
-
-    paths.append((Path.cwd() / ".claude" / "sequencer" / "programs").resolve())
-    paths.append((Path.home() / ".claude" / "sequencer" / "programs").resolve())
 
     seen: set[Path] = set()
     unique: list[Path] = []

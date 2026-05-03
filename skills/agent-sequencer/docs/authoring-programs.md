@@ -63,12 +63,14 @@ under its `NAME = "..."` constant.
 
 | Order | Path | Purpose |
 |---|---|---|
-| 1 | `$AGENT_SEQUENCER_PROGRAMS_DIR` | Environment-variable override (used by plugins to expose their bundled programs; also handy as a development override) |
-| 2 | `<cwd>/.claude/sequencer/programs/` | Project-specific programs (commit them alongside the project that uses them) |
-| 3 | `~/.claude/sequencer/programs/` | User-wide programs (available across every project you open) |
+| 1 | `<cwd>/.claude/sequencer/programs/` | Project-specific programs (commit them alongside the project that uses them) |
+| 2 | `~/.claude/sequencer/programs/` | User-wide programs (available across every project you open) |
+| 3 | `$AGENT_SEQUENCER_PROGRAMS_DIR` | Environment-variable fallback (used by plugins to expose their bundled programs; also handy as a development fallback) |
 
 If two paths contain a program with the same `NAME`, the higher-priority one wins
-and the lower-priority duplicate is silently shadowed.
+and the lower-priority duplicate is silently shadowed. Because plugin-bundled
+programs are appended last, a project-specific or user-wide copy with the same
+`NAME` transparently overrides the plugin's version.
 
 ### Choosing the right location
 

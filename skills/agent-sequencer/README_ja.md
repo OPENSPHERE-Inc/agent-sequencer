@@ -42,12 +42,14 @@ AI エージェントを駆動する MCP スキル。
 
 | 順序 | パス | 用途 |
 |---|---|---|
-| 1 | `$AGENT_SEQUENCER_PROGRAMS_DIR` | プラグイン同梱プログラム（プラグインの `.mcp.json` で設定）／ 開発時オーバーライド |
-| 2 | `<cwd>/.claude/sequencer/programs/` | プロジェクト固有プログラム |
-| 3 | `~/.claude/sequencer/programs/` | ユーザー全体プログラム |
+| 1 | `<cwd>/.claude/sequencer/programs/` | プロジェクト固有プログラム |
+| 2 | `~/.claude/sequencer/programs/` | ユーザー全体プログラム |
+| 3 | `$AGENT_SEQUENCER_PROGRAMS_DIR` | プラグイン同梱プログラム（プラグインの `.mcp.json` で設定）。開発時のフォールバックとしても利用可 |
 
 プラグイン同梱の `programs/` ディレクトリ（このディレクトリ）は
-`AGENT_SEQUENCER_PROGRAMS_DIR` 環境変数経由で渡されます。
+`AGENT_SEQUENCER_PROGRAMS_DIR` 環境変数経由で渡されます。**末尾**に配置されるため、
+同じ `NAME` のプログラムを `<cwd>/.claude/sequencer/programs/` または
+`~/.claude/sequencer/programs/` に置くと、プラグイン同梱版を透過的に上書きできます。
 
 ## スキルの呼び出し方
 

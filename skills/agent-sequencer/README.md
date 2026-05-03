@@ -44,12 +44,14 @@ For details, see [SKILL.md](SKILL.md) (the 9 driving rules).
 
 | Order | Path | Purpose |
 |---|---|---|
-| 1 | `$AGENT_SEQUENCER_PROGRAMS_DIR` | Bundled programs (set in the plugin's `.mcp.json`) / development overrides |
-| 2 | `<cwd>/.claude/sequencer/programs/` | Project-specific programs |
-| 3 | `~/.claude/sequencer/programs/` | User-wide programs |
+| 1 | `<cwd>/.claude/sequencer/programs/` | Project-specific programs |
+| 2 | `~/.claude/sequencer/programs/` | User-wide programs |
+| 3 | `$AGENT_SEQUENCER_PROGRAMS_DIR` | Bundled programs (set in the plugin's `.mcp.json`); also usable as a development fallback |
 
 The `programs/` directory bundled with the plugin (this directory) is passed via the
-`AGENT_SEQUENCER_PROGRAMS_DIR` environment variable.
+`AGENT_SEQUENCER_PROGRAMS_DIR` environment variable. It is searched **last**, so a
+program placed under `<cwd>/.claude/sequencer/programs/` or `~/.claude/sequencer/programs/`
+with the same `NAME` transparently overrides the plugin-bundled copy.
 
 ## How to invoke the skill
 

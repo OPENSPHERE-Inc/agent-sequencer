@@ -8,14 +8,16 @@
 
 `registry.py` は次の順でプログラムを探索します（先勝ち）:
 
-1. `$AGENT_SEQUENCER_PROGRAMS_DIR`（環境変数）
-2. `<cwd>/.claude/sequencer/programs/`（プロジェクト固有）
-3. `~/.claude/sequencer/programs/`（ユーザ全体）
+1. `<cwd>/.claude/sequencer/programs/`（プロジェクト固有）
+2. `~/.claude/sequencer/programs/`（ユーザ全体）
+3. `$AGENT_SEQUENCER_PROGRAMS_DIR`（環境変数）
 
 このディレクトリ（`skills/agent-sequencer/programs/`）はプラグイン同梱で、
 **プラグインの `.mcp.json` から `AGENT_SEQUENCER_PROGRAMS_DIR` 経由で指定** されます。
 MCP サーバの自動探索パスには含まれません（PyPI インストール先とプラグイン
-インストール先が別の場所になるため）。
+インストール先が別の場所になるため）。環境変数エントリは最低優先度で扱われるため、
+同じ `NAME` のプログラムをプロジェクト固有／ユーザ全体パスに置けば、同梱版を
+透過的に上書きできます。
 
 ## 同梱プログラム
 
