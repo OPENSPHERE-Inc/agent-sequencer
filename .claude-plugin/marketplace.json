@@ -8,7 +8,7 @@
     {
       "name": "agent-sequencer",
       "source": "./",
-      "description": "Claude Code skill + MCP server for step-driving AI agents through classical sequencer programs.",
+      "description": "Claude Code skill + MCP server that lets a Python script drive an AI agent through strictly-defined workflows and long-running tasks.",
       "homepage": "https://github.com/OPENSPHERE-Inc/agent-sequencer",
       "license": "MIT",
       "keywords": [
