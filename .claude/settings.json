@@ -15,17 +15,16 @@
       "Bash(git merge-base:*)",
       "Bash(git rev-list:*)",
       "Bash(git branch:*)",
-	    "Bash(git ls-tree:*)",
+      "Bash(git ls-tree:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr diff:*)",
       "Bash(gh pr list:*)",
       "Bash(gh pr checks:*)",
       "Read(.claude/tmp/**)",
-      "Write(.claude/tmp/**)",
-      "Skill(parallel-review)"
+      "Write(.claude/tmp/**)"
     ],
     "deny": [
-	  "Read(.env.production)",
+      "Read(.env.production)",
       "Bash(git push:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh pr lock:*)",
