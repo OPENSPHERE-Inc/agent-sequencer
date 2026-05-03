@@ -91,7 +91,7 @@ returned, and the agent reports this to the user.
 | Find the state directory location | Check `AGENT_SEQUENCER_STATE_DIR` (default: `~/.claude/sequencer/state/`) |
 | View event history for debugging | Read `<state_dir>/<instance_id>.jsonl` |
 | List active instances | `sequencer_list filter="active"` |
-| Unit-test a program | Drive `Driver` directly (see [authoring-programs.md §11](docs/authoring-programs.md)) |
+| Unit-test a program | Drive `Driver` directly (see [authoring-programs.md §12](docs/authoring-programs.md)) |
 
 ## Limitations (v1)
 

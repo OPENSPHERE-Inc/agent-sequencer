@@ -28,7 +28,7 @@ Code. It is a role template designed to be **loaded as context into a
 
 ## Reference documentation
 
-- `skills/agent-sequencer/docs/authoring-programs.md` § 4 (Instruction design) and § 10 (prompt writing tips)
+- `skills/agent-sequencer/docs/authoring-programs.md` § 5 (Instruction design) and § 11 (prompt writing tips)
 
 ## Your responsibilities
 
