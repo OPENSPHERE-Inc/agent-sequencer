@@ -10,10 +10,8 @@ Decision logic is contained within the program, and the agent acts purely as a d
 
 ## Bundled programs
 
-| name | Overview |
-|---|---|
-| `hello` | Minimal sample / smoke-test program. Greets each name in `params["names"]` (default `["world"]`) one at a time |
-| `review-rounds` | Self-review helper for sequencer programs. Three specialists (python-sensei / sequencer-sensei / prompt-sensei) review → respond → verify, iterating up to N rounds until convergence |
+- `hello` — Minimal sample / smoke-test program. Greets each name in `params["names"]` (default `["world"]`) one at a time.
+- `review-rounds` — Self-review helper for sequencer programs. Three specialists (python-sensei / sequencer-sensei / prompt-sensei) review → respond → verify, iterating up to N rounds until convergence.
 
 For how to write new programs, see [`docs/authoring-programs.md`](docs/authoring-programs.md).
 
@@ -31,14 +29,12 @@ For how to write new programs, see [`docs/authoring-programs.md`](docs/authoring
 
 ## MCP tool list
 
-| Tool | Role |
-|---|---|
-| `sequencer_list_programs` | List available programs |
-| `sequencer_start` | Start an instance |
-| `sequencer_current` | Re-fetch the most recent yield (for re-sync) |
-| `sequencer_next` | Submit result and obtain the next yield |
-| `sequencer_resume` | Restore from JSONL |
-| `sequencer_close` | Release (recommended path) |
-| `sequencer_list` | List active instances |
+- `sequencer_list_programs` — List available programs.
+- `sequencer_start` — Start an instance.
+- `sequencer_current` — Re-fetch the most recent yield (for re-sync).
+- `sequencer_next` — Submit result and obtain the next yield.
+- `sequencer_resume` — Restore from JSONL.
+- `sequencer_close` — Release (recommended path).
+- `sequencer_list` — List active instances.
 
 For details including setup and usage, see [`README.md`](README.md).

@@ -5,11 +5,6 @@ description: Verify the resolution status of sequencer-program review findings a
 
 # sequencer-review-resolve
 
-This is the review-verification skill for agent-sequencer sequencer
-programs. It is referenced by the `review_rounds.py` program through
-Instruction calls. It is expert-agnostic — the contents are generic, and
-only the verification result is written back as metadata.
-
 You are the **review verifier**. Your job is to re-read the updated
 review document, verify each finding's resolution status against the
 actual source code, and write the verification result back as
@@ -49,22 +44,18 @@ sequencer-review-respond has already added the `triage` / `estimate` /
 The current state of each finding is decided from **the fields present
 between the markers**:
 
-| Content between markers | State |
-|-------------------------|-------|
-| None | Not yet triaged |
-| Only `Triage: 🔧 Will Fix` | Triaged, estimate pending |
-| `Triage: 🚫 Won't Fix` | Confirmed as no-fix |
-| `Estimate: ▶️ Maintain`, no `Status:` | Estimated, fix pending |
-| `Estimate: 🔻 Downgrade` | Dropped during estimate |
-| `Estimate: 🚧 Alternative`, no `Status:` | Estimate chose alternative; FIXME not yet added |
-| `Status: 🟢 Fixed` | Fix complete (Maintain fix or Alternative FIXME added) |
+- None — Not yet triaged.
+- Only `Triage: 🔧 Will Fix` — Triaged, estimate pending.
+- `Triage: 🚫 Won't Fix` — Confirmed as no-fix.
+- `Estimate: ▶️ Maintain`, no `Status:` — Estimated, fix pending.
+- `Estimate: 🔻 Downgrade` — Dropped during estimate.
+- `Estimate: 🚧 Alternative`, no `Status:` — Estimate chose alternative; FIXME not yet added.
+- `Status: 🟢 Fixed` — Fix complete (Maintain fix or Alternative FIXME added).
 
 sequencer-review-resolve appends the `verification` field in the following form:
 
-| Value | Meaning |
-|-------|---------|
-| `✅ Verified — {brief description of the verification result}` | Resolved |
-| `💬 Feedback — {what is missing and what is needed for full resolution}` | Feedback required |
+- `✅ Verified — {brief description of the verification result}` — Resolved.
+- `💬 Feedback — {what is missing and what is needed for full resolution}` — Feedback required.
 
 For Unresolved findings, do not write `verification` (those are not at the verification stage yet).
 

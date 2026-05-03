@@ -5,10 +5,6 @@ description: Triage, estimate, fix, and verify review findings for a sequencer p
 
 # sequencer-review-respond
 
-This is the review-response skill for agent-sequencer sequencer
-programs. It is referenced by the `review_rounds.py` program through
-Instruction calls.
-
 The reviewers are the **three** experts python-sensei /
 sequencer-sensei / prompt-sensei, used per finding (assigned during
 triage, then individual delegation for estimate and fix).
@@ -30,10 +26,8 @@ as the path to the review document.
 
 ## Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--commit` | OFF | Create a commit for each finding's fix |
-| `--confirm` | OFF | Wait for user confirmation immediately after the estimate results are available |
+- `--commit` (default: OFF) — Create a commit for each finding's fix.
+- `--confirm` (default: OFF) — Wait for user confirmation immediately after the estimate results are available.
 
 When the calling program explicitly specifies an option, that option takes precedence.
 
@@ -76,12 +70,10 @@ metadata marker for each finding
 
 sequencer-review-respond and sequencer-review-resolve append the following fields between the markers:
 
-| Field | Set by | Value format |
-|-------|--------|--------------|
-| `triage` | sequencer-review-respond Step 2 | `🔧 Will Fix (assignee: {specialist}) — {triage rationale}` / `🚫 Won't Fix — {reason no fix is needed}` |
-| `estimate` | sequencer-review-respond Step 3 | `▶️ Maintain — Cost: {S/M/L}, Future: {S/M/L}, Signals: {none\|a,b,c,d,e,f}` / `🔻 Downgrade — Cost: ..., Future: ..., Signals: ... — {downgrade reason}` / `🚧 Alternative — Cost: ..., Future: ..., Signals: ... — FIXME added: {direction}` |
-| `status` | sequencer-review-respond Step 4 | `🟢 Fixed — {brief description of the fix}` |
-| `verification` | sequencer-review-resolve | `✅ Verified — {brief description of the verification result}` |
+- `triage` (set by sequencer-review-respond Step 2) — value format: `🔧 Will Fix (assignee: {specialist}) — {triage rationale}` or `🚫 Won't Fix — {reason no fix is needed}`.
+- `estimate` (set by sequencer-review-respond Step 3) — value format: `▶️ Maintain — Cost: {S/M/L}, Future: {S/M/L}, Signals: {none|a,b,c,d,e,f}` or `🔻 Downgrade — Cost: ..., Future: ..., Signals: ... — {downgrade reason}` or `🚧 Alternative — Cost: ..., Future: ..., Signals: ... — FIXME added: {direction}`.
+- `status` (set by sequencer-review-respond Step 4) — value format: `🟢 Fixed — {brief description of the fix}`.
+- `verification` (set by sequencer-review-resolve) — value format: `✅ Verified — {brief description of the verification result}`.
 
 `{specialist}` is one of **python-sensei / sequencer-sensei / prompt-sensei**.
 
@@ -93,15 +85,17 @@ sequencer-review-respond and sequencer-review-resolve append the following field
 
 ### Emoji reference
 
-| Prefix | Step | Verdict | Emoji | Meaning |
-|--------|------|---------|-------|---------|
-| `triage` | Step 2 | `Will Fix` | 🔧 | Confirmed for fixing |
-| `triage` | " | `Won't Fix` | 🚫 | Confirmed as no-fix |
-| `estimate` | Step 3 | `Maintain` | ▶️ | Maintain the triage verdict (proceed with the fix) |
-| `estimate` | " | `Downgrade` | 🔻 | Overturn the triage verdict and do not fix |
-| `estimate` | " | `Alternative` | 🚧 | Overturn the triage verdict but use an alternative such as a FIXME comment |
-| `status` | Step 4 | `Fixed` | 🟢 | Fix complete |
-| `verification` | sequencer-review-resolve | `Verified` | ✅ | Verification complete |
+- `triage` (Step 2):
+  - 🔧 `Will Fix` — Confirmed for fixing.
+  - 🚫 `Won't Fix` — Confirmed as no-fix.
+- `estimate` (Step 3):
+  - ▶️ `Maintain` — Maintain the triage verdict (proceed with the fix).
+  - 🔻 `Downgrade` — Overturn the triage verdict and do not fix.
+  - 🚧 `Alternative` — Overturn the triage verdict but use an alternative such as a FIXME comment.
+- `status` (Step 4):
+  - 🟢 `Fixed` — Fix complete.
+- `verification` (sequencer-review-resolve):
+  - ✅ `Verified` — Verification complete.
 
 ## Internal handling (events.jsonl)
 

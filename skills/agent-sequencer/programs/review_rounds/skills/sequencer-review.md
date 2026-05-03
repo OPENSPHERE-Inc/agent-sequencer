@@ -5,11 +5,6 @@ description: Run a parallel code review of an agent-sequencer sequencer program 
 
 # sequencer-review
 
-This is the skill used to review agent-sequencer sequencer programs.
-It is referenced by the `review_rounds.py` program through Instruction
-calls. It is **not** registered as a Claude Code skill; it is loaded by
-**path reference** from ordinary tools such as Bash / Read / Write.
-
 Three expert agents are launched in parallel and each contributes
 findings from its own angle. The findings are merged into a single
 review document.
@@ -32,10 +27,8 @@ modified file in the diff) is the target.
 
 ## Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--base {branch}` | `main` or `master` | Specify the base branch |
-| `--target {path}` | (entire diff if unset) | Review target path. When set, instruct each reviewer to raise findings only against files under that path |
+- `--base {branch}` (default: `main` or `master`) — Specify the base branch.
+- `--target {path}` (default: entire diff if unset) — Review target path. When set, instruct each reviewer to raise findings only against files under that path.
 
 If the base branch is not specified via `--base`, use `main` or
 `master` from the remote (prefer `main` when both exist).
@@ -46,16 +39,12 @@ A sequencer program is a composite of a Python generator + prompts +
 the sequencer API, so the review is split along three axes and each
 expert is launched in parallel:
 
-| Reviewer | Focus | Agent definition |
-|----------|-------|------------------|
-| **python-sensei** | Python language semantics, type hints, async/await, PEP compliance, mutable default arguments, and other language-specific pitfalls | `skills/agent-sequencer/programs/review_rounds/agents/python-sensei.md` |
-| **sequencer-sensei** | Correct use of the agent-sequencer API, determinism, generator bidirectional communication, lifecycle, `expect_schema` design, bundling | `skills/agent-sequencer/programs/review_rounds/agents/sequencer-sensei.md` |
-| **prompt-sensei** | Structure of Instruction.text, consistency with `expect_schema`, explicit constraints to prevent runaway behavior, template design, minimal decoration | `skills/agent-sequencer/programs/review_rounds/agents/prompt-sensei.md` |
+- **python-sensei** — Python language semantics, type hints, async/await, PEP compliance, mutable default arguments, and other language-specific pitfalls. Definition: `skills/agent-sequencer/programs/review_rounds/agents/python-sensei.md`.
+- **sequencer-sensei** — Correct use of the agent-sequencer API, determinism, generator bidirectional communication, lifecycle, `expect_schema` design, bundling. Definition: `skills/agent-sequencer/programs/review_rounds/agents/sequencer-sensei.md`.
+- **prompt-sensei** — Structure of Instruction.text, consistency with `expect_schema`, explicit constraints to prevent runaway behavior, template design, minimal decoration. Definition: `skills/agent-sequencer/programs/review_rounds/agents/prompt-sensei.md`.
 
-> Operates on the assumption that the three custom agents above are
-> **not** registered with Claude Code. In practice, `general-purpose`
-> subagents are launched and the agent definition files above are
-> loaded as context (see the template below).
+Launch each as a `general-purpose` subagent and load the corresponding
+agent definition file as the role context (see the template below).
 
 ## Step 1 — Identify review scope and fetch the diff
 

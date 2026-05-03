@@ -1,6 +1,6 @@
 # AGENTS.md — agent-sequencer
 
-This file provides a brief overview for AI agents. For detailed project documentation, coding guidelines, architecture, and build instructions, see **[CLAUDE.md](CLAUDE.md)**.
+For detailed project documentation, coding guidelines, architecture, and build instructions, see **[CLAUDE.md](CLAUDE.md)**.
 
 ## Quick Reference
 
@@ -13,26 +13,24 @@ This file provides a brief overview for AI agents. For detailed project document
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `pyproject.toml` | Python package definition (Hatchling backend, name = `agent-sequencer`) |
-| `src/agent_sequencer/__main__.py` | CLI entry point (`agent-sequencer` command) + search-path resolution |
-| `src/agent_sequencer/api.py` | Yield types: `Instruction` / `Done` / `Abort` / `Progress` / `Context` / `StepFailed` |
-| `src/agent_sequencer/runtime.py` | `Driver`: generator runtime + jsonschema validation + on_invalid retry/abort |
-| `src/agent_sequencer/instance.py` | `Instance` + `InstanceStore` (per-instance `asyncio.Lock`) |
-| `src/agent_sequencer/registry.py` | `ProgramRegistry`: program discovery, `compile() + exec()` loader, hot-reload `rescan()` |
-| `src/agent_sequencer/persistence.py` | `EventLog` (JSONL), deterministic replay, disk-TTL prune |
-| `src/agent_sequencer/tools.py` | The 7 MCP tools (`sequencer_list_programs` / `start` / `current` / `next` / `resume` / `close` / `list`) |
-| `tests/` | pytest suite (Driver / registry / persistence / bundled review-rounds) |
-| `.claude-plugin/plugin.json` | Claude Code plugin manifest |
-| `.claude-plugin/marketplace.json` | Marketplace listing (the repo registers itself) |
-| `.mcp.json` | Plugin-bundled MCP server registration (uses `${CLAUDE_PLUGIN_ROOT}`) |
-| `skills/agent-sequencer/SKILL.md` | Driving rules loaded into agent context (kept short) |
-| `skills/agent-sequencer/docs/authoring-programs.md` | Sequencer-program author's guide |
-| `skills/agent-sequencer/programs/review_rounds.py` | Bundled review-rounds program |
-| `skills/agent-sequencer/programs/review_rounds/` | Self-contained bundle (skills, agents, scripts) |
-| `.github/workflows/ci.yml` | pytest matrix (3 OS × 3 Python) + `uv tool install` smoke test |
-| `README.md` / `README_ja.md` | English README + its Japanese translation |
+- `pyproject.toml` — Python package definition (Hatchling backend, name = `agent-sequencer`).
+- `src/agent_sequencer/__main__.py` — CLI entry point (`agent-sequencer` command) + search-path resolution.
+- `src/agent_sequencer/api.py` — Yield types: `Instruction` / `Done` / `Abort` / `Progress` / `Context` / `StepFailed`.
+- `src/agent_sequencer/runtime.py` — `Driver`: generator runtime + jsonschema validation + on_invalid retry/abort.
+- `src/agent_sequencer/instance.py` — `Instance` + `InstanceStore` (per-instance `asyncio.Lock`).
+- `src/agent_sequencer/registry.py` — `ProgramRegistry`: program discovery, `compile() + exec()` loader, hot-reload `rescan()`.
+- `src/agent_sequencer/persistence.py` — `EventLog` (JSONL), deterministic replay, disk-TTL prune.
+- `src/agent_sequencer/tools.py` — The 7 MCP tools (`sequencer_list_programs` / `start` / `current` / `next` / `resume` / `close` / `list`).
+- `tests/` — pytest suite (Driver / registry / persistence / bundled review-rounds).
+- `.claude-plugin/plugin.json` — Claude Code plugin manifest.
+- `.claude-plugin/marketplace.json` — Marketplace listing (the repo registers itself).
+- `.mcp.json` — Plugin-bundled MCP server registration (uses `${CLAUDE_PLUGIN_ROOT}`).
+- `skills/agent-sequencer/SKILL.md` — Driving rules loaded into agent context (kept short).
+- `skills/agent-sequencer/docs/authoring-programs.md` — Sequencer-program author's guide.
+- `skills/agent-sequencer/programs/review_rounds.py` — Bundled review-rounds program.
+- `skills/agent-sequencer/programs/review_rounds/` — Self-contained bundle (skills, agents, scripts).
+- `.github/workflows/ci.yml` — pytest matrix (3 OS × 3 Python) + `uv tool install` smoke test.
+- `README.md` / `README_ja.md` — English README + its Japanese translation.
 
 ## Essential Rules
 
