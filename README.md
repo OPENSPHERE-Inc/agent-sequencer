@@ -52,15 +52,15 @@ as conversation context degrades over long-running tasks.
   Author's guide: [`docs/authoring-programs.md`](skills/agent-sequencer/docs/authoring-programs.md).
 - **Invoke it from an AI agent (Claude Code) via MCP tools** — `sequencer_list_programs`
   to discover, `sequencer_start` to launch, `sequencer_next` to submit a result,
-  `sequencer_resume` to recover an interrupted instance.
-  Full tool list: [`skills/agent-sequencer/README.md`](skills/agent-sequencer/README.md#mcp-tool-list)
+  `sequencer_resume` to recover an interrupted instance. Full tool list:
+  [`skills/agent-sequencer/README.md`](skills/agent-sequencer/README.md#mcp-tool-list)
 - **Stable execution of long-running workflows** — every step's response is validated
   against a JSON Schema with automatic retry on violation; interruptions and post-compact
   desyncs recover via deterministic replay of a JSONL event log; `--watch` hot-reloads
   program edits during development.
 
-For details, see [`skills/agent-sequencer/SKILL.md`](skills/agent-sequencer/SKILL.md) (driving rules) and
-[`skills/agent-sequencer/docs/authoring-programs.md`](skills/agent-sequencer/docs/authoring-programs.md) (program author's guide).
+For details, see [`SKILL.md`](skills/agent-sequencer/SKILL.md) (driving rules)
+and the [program author's guide](skills/agent-sequencer/docs/authoring-programs.md).
 
 For your own programs, the bundled
 [`review-rounds`](skills/agent-sequencer/programs/review_rounds/README.md)
@@ -178,7 +178,8 @@ Example `.mcp.json` for cloning the repository and running the MCP server direct
 }
 ```
 
-`--watch` enables hot reload during development (it picks up changes to `programs/*.py` with a 2-second throttle).
+`--watch` enables hot reload during development
+(it picks up changes to `programs/*.py` with a 2-second throttle).
 
 ### MCP tool permissions
 
@@ -256,7 +257,8 @@ Programs are searched in the following order (first match wins):
 - HTTP/SSE transport (sharing across multiple Claude Code sessions) is not yet implemented.
 - Program sandboxing (stronger trust boundary) is not yet implemented.
 - Execution of TypeScript / Lua programs is not yet implemented.
-- PyPI publishing is not supported (planned for Phase 2; only git-based distribution is available at this time).
+- PyPI publishing is not yet supported; only git-based distribution is available
+  at this time.
 
 ---
 

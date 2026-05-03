@@ -19,8 +19,10 @@ AI エージェントを駆動する MCP スキル。
 1. ユーザーから依頼を受けたら、`sequencer_list_programs` で該当するプログラムを特定する。
 2. `sequencer_start` でインスタンスを起動し、返却された `instance_id` を最優先で記憶する。
 3. `last_yield.text` を（自前のツールで）実行する。
-4. `expect_schema` に沿って結果を組み立て、`sequencer_next(for_step_no=<現在値>, result=...)` で投函する。
-5. `state` が `completed` / `aborted` / `failed` になったら、**最終結果をユーザーへ報告し `sequencer_close` を呼ぶ**。
+4. `expect_schema` に沿って結果を組み立て、
+   `sequencer_next(for_step_no=<現在値>, result=...)` で投函する。
+5. `state` が `completed` / `aborted` / `failed` になったら、
+   **最終結果をユーザーへ報告し `sequencer_close` を呼ぶ**。
 
 詳細は [SKILL.md](SKILL.md)（9 個の駆動ルール）を参照。
 

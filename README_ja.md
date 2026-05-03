@@ -250,7 +250,7 @@ agent-sequencer/
 - HTTP/SSE トランスポート（複数 Claude Code セッション間で共有）は未実装
 - プログラムサンドボックス（信頼境界の強化）は未実装
 - TypeScript / Lua プログラムの実行は未実装
-- PyPI 公開は未対応（Phase 2 で対応予定。現時点は git ベース配布のみ）
+- PyPI 公開は未対応（現時点は git ベース配布のみ）
 
 ---
 

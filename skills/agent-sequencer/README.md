@@ -16,11 +16,15 @@ For repository-wide topics (installation, distribution, CI, etc.) see the
 
 ## Driving flow (summary)
 
-1. When you receive a user request, run `sequencer_list_programs` to identify the appropriate program.
-2. Start an instance with `sequencer_start`, then memorize the returned `instance_id` as the highest priority.
+1. When you receive a user request, run `sequencer_list_programs` to identify the
+   appropriate program.
+2. Start an instance with `sequencer_start`, then memorize the returned `instance_id`
+   as the highest priority.
 3. Execute `last_yield.text` (using your own tools).
-4. Assemble the result according to `expect_schema` and submit it via `sequencer_next(for_step_no=<current value>, result=...)`.
-5. When `state` becomes `completed` / `aborted` / `failed`, **report the final result to the user and call `sequencer_close`**.
+4. Assemble the result according to `expect_schema` and submit it via
+   `sequencer_next(for_step_no=<current value>, result=...)`.
+5. When `state` becomes `completed` / `aborted` / `failed`,
+   **report the final result to the user and call `sequencer_close`**.
 
 For details, see [SKILL.md](SKILL.md) (the 9 driving rules).
 

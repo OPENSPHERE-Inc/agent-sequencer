@@ -15,7 +15,8 @@ A sequencer program is a "**classical program for driving an AI agent**."
 | AI agent | Executes the `Instruction.text` yielded by the program and reports the result as JSON |
 | Driver / runtime | Schema validation, step_no management, generator driving, JSONL persistence, replay |
 
-**Decisions stay inside the program; the agent acts purely as a driver that executes instructions** —
+**Decisions stay inside the program; the agent acts purely as a driver
+that executes instructions** —
 this is the basic principle. Inside the program you write branches like `if result["x"] == ...:`,
 and to the agent you simply say "do this."
 
@@ -104,7 +105,8 @@ The runtime `Driver` operates as follows:
 1. Advance to the first yield with `next(gen)`.
 2. Send the yielded `Instruction` to the agent.
 3. Validate the agent's returned result against `expect_schema`.
-4. Inject the validated result into the left-hand side of `result =` with `gen.send(validated_result)` and advance to the next yield.
+4. Inject the validated result into the left-hand side of `result =` with
+   `gen.send(validated_result)` and advance to the next yield.
 
 ### Yield types
 
@@ -114,8 +116,9 @@ The runtime `Driver` operates as follows:
 | `Done(summary)` | Normal program completion. `summary` is used in the final report to the user |
 | `Abort(reason)` | Abnormal program termination. `reason` is shown to the user |
 
-A bare `return` is also treated as completion via `StopIteration`, but **writing an explicit `yield Done()`
-is recommended** (for observability and to make tracking via JSONL logs easier).
+A bare `return` is also treated as completion via `StopIteration`, but **writing
+an explicit `yield Done()` is recommended** (for observability and to make
+tracking via JSONL logs easier).
 
 ## 5. Designing Instructions
 
@@ -128,7 +131,8 @@ Instead, focus on:
 - **Reference the skill / procedure to use** at the very beginning (`Skill: <path>`)
 - **State the target scope explicitly** (ambiguity causes the agent to overreach)
 - **Show the report format (JSON) inline** as an example
-- **State what must not be done** (e.g., consulting other context for understanding is allowed, but commenting on out-of-scope items is forbidden)
+- **State what must not be done** (e.g., consulting other context for understanding
+  is allowed, but commenting on out-of-scope items is forbidden)
 
 ### 5.2 `expect_schema`
 
@@ -161,13 +165,15 @@ You can choose what happens on a schema violation:
 | `"retry"` (default) | Re-issue the same Instruction with a new step_no. The violation is communicated to the agent via `last_yield.validation_error`. |
 | `"abort"` | Abort the instance. |
 
-`"retry"` is usually sufficient. Rather than writing program-side fallback logic that "switches behavior when an invalid value arrives,"
-it is more robust to constrain via schema and let the agent fix it.
+`"retry"` is usually sufficient. Rather than writing program-side fallback logic
+that "switches behavior when an invalid value arrives," it is more robust to
+constrain via schema and let the agent fix it.
 
 ### 5.4 `timeout_minutes`
 
-A guideline duration for the agent. The Driver does not forcibly interrupt, but the value is exposed
-in `current.last_yield`, so it helps the agent understand "this is the kind of work that takes about this long."
+A guideline duration for the agent. The Driver does not forcibly interrupt, but the
+value is exposed in `current.last_yield`, so it helps the agent understand
+"this is the kind of work that takes about this long."
 
 ## 6. Using the Context (`ctx`)
 
@@ -190,8 +196,8 @@ def run(ctx):
 
 ## 7. Determinism constraints (most important)
 
-**Programs must be written deterministically.** This is a prerequisite for replaying JSONL logs (resume)
-and arriving at the exact same final state.
+**Programs must be written deterministically.** This is a prerequisite for replaying
+JSONL logs (resume) and arriving at the exact same final state.
 
 ### 7.1 What you must not do
 
@@ -245,7 +251,8 @@ RUNNING → AWAITING_RESULT → (Done | Abort | exception) → TERMINAL_QUERYABL
 
 - **Done**: normal completion. `summary` can be reported to the user.
 - **Abort**: abnormal but anticipated termination. `reason` is shown to the user.
-- **Exception**: unanticipated bug. The state becomes `failed` and an `error` kind `last_yield` is automatically returned to the agent.
+- **Exception**: unanticipated bug. The state becomes `failed` and an `error` kind
+  `last_yield` is automatically returned to the agent.
 
 ## 9. Hot-reload caveats
 
@@ -310,7 +317,7 @@ programs/
 - Modifying `.md` files inside the bundle does not change `source_hash` (the hash is taken
   only over the `.py` body of the program). If you split a template into a separate `.md`,
   loading it into memory at module load time works in practice, but the resume-time
-  consistency check will not cover it (deferred to v2).
+  consistency check will not cover it.
 - Build paths to bundle files starting from `Path(__file__).parent / "<program-name>"`
   so they don't depend on the plugin install location (see the `_BUNDLE` constant in
   `review_rounds.py`).
@@ -355,8 +362,10 @@ A single `[Step name]` header line plus `key: value` lines is enough.
 
 Skills should be general; the program should narrow the target. In `review_rounds.py`:
 
-- `python-review.md` — a general-purpose Python review skill (scope is given via the `--target` argument)
-- `review_rounds.py` — passes `--target .claude/skills/agent-sequencer/server` explicitly in the Instruction text
+- `python-review.md` — a general-purpose Python review skill
+  (scope is given via the `--target` argument)
+- `review_rounds.py` — passes `--target .claude/skills/agent-sequencer/server`
+  explicitly in the Instruction text
 
 This keeps the python-review skill reusable from other programs.
 
