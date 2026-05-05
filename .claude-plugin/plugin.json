@@ -1,6 +1,6 @@
 {
   "name": "agent-sequencer",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Claude Code skill + MCP server that lets a Python script drive an AI agent through strictly-defined workflows and long-running tasks.",
   "author": {
     "name": "OPENSPHERE Inc.",
