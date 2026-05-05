@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pytest
 
-from agent_sequencer.__main__ import _resolve_search_paths
+from agent_sequencer.__main__ import (
+    _resolve_memo_limits,
+    _resolve_search_paths,
+)
+from agent_sequencer.memo import (
+    DEFAULT_INSTANCE_LIMIT,
+    DEFAULT_VALUE_LIMIT,
+)
 
 
 def _patch_home_and_cwd(monkeypatch: pytest.MonkeyPatch, home: Path, cwd: Path) -> None:
@@ -74,3 +82,61 @@ def test_duplicate_paths_are_deduplicated(monkeypatch: pytest.MonkeyPatch, tmp_p
 
     # The env entry is the duplicate; the dedupe pass keeps the first occurrence.
     assert paths == [expected_cwd, expected_home]
+
+
+# ----------------------------------------------------------------------
+# Memo quota env-var resolution
+# ----------------------------------------------------------------------
+def test_memo_limits_default_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AGENT_SEQUENCER_MEMO_VALUE_LIMIT", raising=False)
+    monkeypatch.delenv(
+        "AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT", raising=False
+    )
+    value, instance = _resolve_memo_limits(logging.getLogger("test"))
+    assert value == DEFAULT_VALUE_LIMIT
+    assert instance == DEFAULT_INSTANCE_LIMIT
+
+
+def test_memo_limits_overridden(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AGENT_SEQUENCER_MEMO_VALUE_LIMIT", "2048")
+    monkeypatch.setenv("AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT", "8192")
+    value, instance = _resolve_memo_limits(logging.getLogger("test"))
+    assert value == 2048
+    assert instance == 8192
+
+
+def test_memo_limits_falls_back_on_garbage(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    monkeypatch.setenv("AGENT_SEQUENCER_MEMO_VALUE_LIMIT", "not-a-number")
+    monkeypatch.setenv("AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT", "0")
+    with caplog.at_level(logging.WARNING):
+        value, instance = _resolve_memo_limits(
+            logging.getLogger("test")
+        )
+    assert value == DEFAULT_VALUE_LIMIT
+    assert instance == DEFAULT_INSTANCE_LIMIT
+    # Both bad inputs should log a warning.
+    assert any(
+        "AGENT_SEQUENCER_MEMO_VALUE_LIMIT" in r.message
+        for r in caplog.records
+    )
+    assert any(
+        "AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT" in r.message
+        for r in caplog.records
+    )
+
+
+def test_memo_limits_empty_string_is_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AGENT_SEQUENCER_MEMO_VALUE_LIMIT", "")
+    monkeypatch.setenv("AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT", "")
+    value, instance = _resolve_memo_limits(logging.getLogger("test"))
+    assert value == DEFAULT_VALUE_LIMIT
+    assert instance == DEFAULT_INSTANCE_LIMIT

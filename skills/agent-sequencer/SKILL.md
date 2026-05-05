@@ -36,5 +36,6 @@ For how to write new programs, see [`docs/authoring-programs.md`](docs/authoring
 - `sequencer_resume` — Restore from JSONL.
 - `sequencer_close` — Release (recommended path).
 - `sequencer_list` — List active instances.
+- `sequencer_memo_set` / `_get` / `_keys` / `_delete` — Volatile per-instance KV scoped to the current Instruction (cleared on every `sequencer_next`). Use it to let parallel sub-agents share intermediate JSON without round-tripping through the orchestrator's context. Cross-step retention is structurally impossible; for state that must outlive a step, use files.
 
 For details including setup and usage, see [`README.md`](README.md).

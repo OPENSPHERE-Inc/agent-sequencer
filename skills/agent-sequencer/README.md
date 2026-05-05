@@ -39,6 +39,10 @@ For details, see [SKILL.md](SKILL.md) (the 9 driving rules).
 | `sequencer_resume` | Restore from JSONL |
 | `sequencer_close` | Release (recommended path) |
 | `sequencer_list` | List active instances |
+| `sequencer_memo_set` | Store a JSON value in the per-instance memo. Cleared on the next `sequencer_next` call |
+| `sequencer_memo_get` | Read a value from the per-instance memo |
+| `sequencer_memo_keys` | List keys in the per-instance memo, optionally prefix-filtered |
+| `sequencer_memo_delete` | Delete a key from the per-instance memo |
 
 ## Program search paths (first-match wins)
 

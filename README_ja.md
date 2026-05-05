@@ -55,6 +55,11 @@
 - **長時間ワークフローの安定実行** — JSON Schema で各ステップの応答を厳密検証し、
   違反は自動リトライ。interrupt / compact 後も JSONL の決定論的再生で完全復旧。
   `--watch` でプログラム編集をホットリロード
+- **サブエージェント間 IPC のための揮発性ステップ内メモ** —
+  `sequencer_memo_*` ツールは小さなインメモリ KV を提供し、`sequencer_next`
+  ごとに自動クリアされる。並列に動くサブエージェントが中間 JSON をオーケスト
+  レーターのコンテキストに乗せずにやり取りできる。ステップ越え保持は構造的
+  に不可能なため、resume との整合性は自動的に保たれる
 
 詳しくは [`SKILL.md`](skills/agent-sequencer/SKILL.md)（駆動ルール）と
 [`docs/authoring-programs_ja.md`](skills/agent-sequencer/docs/authoring-programs_ja.md)
@@ -187,7 +192,11 @@ instance_id=abc123 を resume して続きから進めてください
     "mcp__agent-sequencer__sequencer_next",
     "mcp__agent-sequencer__sequencer_resume",
     "mcp__agent-sequencer__sequencer_close",
-    "mcp__agent-sequencer__sequencer_list"
+    "mcp__agent-sequencer__sequencer_list",
+    "mcp__agent-sequencer__sequencer_memo_set",
+    "mcp__agent-sequencer__sequencer_memo_get",
+    "mcp__agent-sequencer__sequencer_memo_keys",
+    "mcp__agent-sequencer__sequencer_memo_delete"
   ]
 }
 ```
@@ -235,6 +244,8 @@ agent-sequencer/
 |---|---|---|
 | `AGENT_SEQUENCER_PROGRAMS_DIR` | 追加のプログラム探索パス（最低優先度のフォールバック。プラグインが同梱プログラムを公開するために使用） | （未設定） |
 | `AGENT_SEQUENCER_STATE_DIR` | JSONL イベントログの配置ディレクトリ | `~/.claude/sequencer/state/` |
+| `AGENT_SEQUENCER_MEMO_VALUE_LIMIT` | `sequencer_memo_*` の 1 値あたりのバイト上限（UTF-8 JSON 表現） | `1048576`（1 MiB） |
+| `AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT` | `sequencer_memo_*` の 1 インスタンス合計バイト上限 | `67108864`（64 MiB） |
 
 プログラム探索は次の順（先勝ち）:
 

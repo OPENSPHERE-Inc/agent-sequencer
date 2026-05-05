@@ -37,6 +37,10 @@ AI エージェントを駆動する MCP スキル。
 | `sequencer_resume` | JSONL からの復元 |
 | `sequencer_close` | 解放（推奨経路） |
 | `sequencer_list` | アクティブなインスタンスの一覧 |
+| `sequencer_memo_set` | インスタンスごとのメモに JSON 値を保存（次の `sequencer_next` でクリア） |
+| `sequencer_memo_get` | インスタンスごとのメモから値を取得 |
+| `sequencer_memo_keys` | インスタンスごとのメモのキー一覧（任意で prefix フィルタ） |
+| `sequencer_memo_delete` | インスタンスごとのメモからキーを削除 |
 
 ## プログラム探索パス（先勝ち）
 
