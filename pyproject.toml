@@ -1,6 +1,6 @@
 [project]
 name = "agent-sequencer"
-version = "0.1.2"
+version = "0.1.3"
 description = "MCP skill + server that lets a Python script drive an AI agent through strictly-defined workflows and long-running tasks."
 readme = "README.md"
 license = { text = "MIT" }

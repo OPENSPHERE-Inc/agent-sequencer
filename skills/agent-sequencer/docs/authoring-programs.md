@@ -288,6 +288,64 @@ The JSONL `header.source_hash` is compared with the current source's hash; if th
 resume is rejected with a `ProgramChanged` error. This is the mechanism for detecting
 "the prerequisite for deterministic replay has been broken," and there is no way around it.
 
+## 9.5 Volatile memo store (sub-agent IPC)
+
+The MCP server exposes four `sequencer_memo_*` tools backed by a small
+in-memory KV store. They are intended for **sub-agent IPC during the
+execution of a single Instruction**: parallel sub-agents launched by
+the orchestrator can stash intermediate JSON results without sending
+them back through the orchestrator's context.
+
+### 9.5.1 Lifecycle (memorize this)
+
+- The memo bucket for an instance is **cleared at the top of every
+  `sequencer_next` call**, before the program advances. There is no way
+  to keep a memo entry alive across two Instructions.
+- The bucket is also dropped on `sequencer_close` and on TTL archive.
+- Nothing is persisted to disk, nothing is replayed on `sequencer_resume`.
+
+The combined effect is that the memo is always empty at the start of
+any Instruction's execution, both in fresh runs and in resumed runs.
+This is what makes the memo compatible with deterministic replay
+without any author-side discipline.
+
+### 9.5.2 Authoring rules
+
+- **Do not call any `sequencer_memo_*` tool from inside `run(ctx)`.**
+  Doing so would constitute I/O inside the program and break
+  determinism. `ctx` deliberately does not expose a memo API.
+- Inside `Instruction.text`, instruct sub-agents to use the memo
+  themselves. Pass the orchestrator's known `instance_id` and a key
+  naming scheme. A typical template:
+
+  ```
+  Sub-agents must write their per-finding result to the memo:
+    tool: sequencer_memo_set
+    instance_id: <orchestrator's instance_id>
+    key: round{N}/triage/<finding-id>
+    value: {triage JSON}
+
+  An aggregator sub-agent reads memo keys with prefix
+  "round{N}/triage/" and produces the final triage table.
+  ```
+
+- Choose hierarchical keys (`round1/triage/C-1`) so that
+  `sequencer_memo_keys(prefix=...)` can be used to drive an aggregator
+  sub-agent.
+- For data that must outlive the current step (across rounds, across
+  resume), use **files** (write paths to disk, return the path in the
+  Instruction result). The memo is not a substitute for files.
+
+### 9.5.3 Quotas
+
+- Per-value byte ceiling: 1 MiB by default
+  (`AGENT_SEQUENCER_MEMO_VALUE_LIMIT`).
+- Per-instance total byte ceiling: 64 MiB by default
+  (`AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT`).
+
+Both limits count the UTF-8 byte size of the JSON encoding of the
+value.
+
 ## 10. Bundling programs (recommended)
 
 When a program depends on external skills, agent definitions, or scripts,

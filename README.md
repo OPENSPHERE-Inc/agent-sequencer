@@ -58,6 +58,11 @@ as conversation context degrades over long-running tasks.
   against a JSON Schema with automatic retry on violation; interruptions and post-compact
   desyncs recover via deterministic replay of a JSONL event log; `--watch` hot-reloads
   program edits during development.
+- **Volatile per-step memo for sub-agent IPC** — the `sequencer_memo_*` tools expose a
+  small in-memory KV that is cleared on every `sequencer_next` call. Parallel sub-agents
+  can stash intermediate JSON without pushing it through the orchestrator's context.
+  Cross-step retention is structurally impossible, which keeps the resume contract
+  trivially consistent.
 
 For details, see [`SKILL.md`](skills/agent-sequencer/SKILL.md) (driving rules)
 and the [program author's guide](skills/agent-sequencer/docs/authoring-programs.md).
@@ -194,7 +199,11 @@ Add the following to the allow list in `.claude/settings.local.json` (or similar
     "mcp__agent-sequencer__sequencer_next",
     "mcp__agent-sequencer__sequencer_resume",
     "mcp__agent-sequencer__sequencer_close",
-    "mcp__agent-sequencer__sequencer_list"
+    "mcp__agent-sequencer__sequencer_list",
+    "mcp__agent-sequencer__sequencer_memo_set",
+    "mcp__agent-sequencer__sequencer_memo_get",
+    "mcp__agent-sequencer__sequencer_memo_keys",
+    "mcp__agent-sequencer__sequencer_memo_delete"
   ]
 }
 ```
@@ -242,6 +251,8 @@ agent-sequencer/
 |---|---|---|
 | `AGENT_SEQUENCER_PROGRAMS_DIR` | Additional program search path appended as the lowest-priority fallback (used by plugins to ship bundled programs) | (unset) |
 | `AGENT_SEQUENCER_STATE_DIR` | Directory for JSONL event logs | `~/.claude/sequencer/state/` |
+| `AGENT_SEQUENCER_MEMO_VALUE_LIMIT` | Per-value byte ceiling for `sequencer_memo_*` (UTF-8 JSON encoding) | `1048576` (1 MiB) |
+| `AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT` | Per-instance total byte ceiling for `sequencer_memo_*` | `67108864` (64 MiB) |
 
 Programs are searched in the following order (first match wins):
 

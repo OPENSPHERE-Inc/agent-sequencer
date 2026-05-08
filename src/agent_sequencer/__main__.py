@@ -9,13 +9,22 @@ CLI:
              sequencer_list_programs / sequencer_start / sequencer_resume).
 
 Environment variables:
-  AGENT_SEQUENCER_PROGRAMS_DIR  Additional program search path appended as
-                                the lowest-priority fallback (used by
-                                plugins to ship bundled programs that user
-                                / project paths can override). Excluded
-                                from the search list when unset.
-  AGENT_SEQUENCER_STATE_DIR     Directory where JSONL event logs are stored.
-                                Defaults to ~/.claude/sequencer/state/.
+  AGENT_SEQUENCER_PROGRAMS_DIR        Additional program search path
+                                      appended as the lowest-priority
+                                      fallback (used by plugins to ship
+                                      bundled programs that user /
+                                      project paths can override).
+                                      Excluded from the search list when
+                                      unset.
+  AGENT_SEQUENCER_STATE_DIR           Directory where JSONL event logs
+                                      are stored. Defaults to
+                                      ~/.claude/sequencer/state/.
+  AGENT_SEQUENCER_MEMO_VALUE_LIMIT    Per-value byte ceiling for the
+                                      sequencer_memo_* tools. Defaults
+                                      to 1 MiB.
+  AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT Per-instance total byte ceiling
+                                      for the sequencer_memo_* tools.
+                                      Defaults to 64 MiB.
 """
 
 from __future__ import annotations
@@ -26,6 +35,10 @@ import os
 import sys
 from pathlib import Path
 
+from .memo import (
+    DEFAULT_INSTANCE_LIMIT as MEMO_DEFAULT_INSTANCE_LIMIT,
+    DEFAULT_VALUE_LIMIT as MEMO_DEFAULT_VALUE_LIMIT,
+)
 from .persistence import prune_old_logs
 from .tools import build_server
 
@@ -55,6 +68,13 @@ def main() -> None:
     state_dir = _resolve_state_dir()
     logger.info("State directory: %s", state_dir)
 
+    memo_value_limit, memo_instance_limit = _resolve_memo_limits(logger)
+    logger.info(
+        "Memo quotas: per-value=%d bytes, per-instance=%d bytes",
+        memo_value_limit,
+        memo_instance_limit,
+    )
+
     # Prune JSONL files older than the disk TTL once at startup.
     state_dir.mkdir(parents=True, exist_ok=True)
     pruned = prune_old_logs(state_dir)
@@ -65,6 +85,8 @@ def main() -> None:
         search_paths=search_paths,
         state_dir=state_dir,
         watch=args.watch,
+        memo_value_limit=memo_value_limit,
+        memo_instance_limit=memo_instance_limit,
     )
     mcp.run(transport="stdio")
 
@@ -133,6 +155,57 @@ def _resolve_state_dir() -> Path:
     if env_dir:
         return Path(env_dir).expanduser().resolve()
     return Path.home() / ".claude" / "sequencer" / "state"
+
+
+def _resolve_memo_limits(
+    logger: logging.Logger,
+) -> tuple[int, int]:
+    """Resolve memo quotas from AGENT_SEQUENCER_MEMO_* env vars.
+
+    Falls back to the defaults exported from agent_sequencer.memo when
+    the variables are unset or contain a non-positive integer; in the
+    latter case a warning is logged so misconfigurations are visible.
+    """
+    return (
+        _read_positive_int_env(
+            "AGENT_SEQUENCER_MEMO_VALUE_LIMIT",
+            MEMO_DEFAULT_VALUE_LIMIT,
+            logger,
+        ),
+        _read_positive_int_env(
+            "AGENT_SEQUENCER_MEMO_INSTANCE_LIMIT",
+            MEMO_DEFAULT_INSTANCE_LIMIT,
+            logger,
+        ),
+    )
+
+
+def _read_positive_int_env(
+    name: str, default: int, logger: logging.Logger
+) -> int:
+    """Read a positive integer from an env var, falling back on errors."""
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        logger.warning(
+            "Invalid %s=%r (not an integer), using default %d",
+            name,
+            raw,
+            default,
+        )
+        return default
+    if value <= 0:
+        logger.warning(
+            "Invalid %s=%d (must be positive), using default %d",
+            name,
+            value,
+            default,
+        )
+        return default
+    return value
 
 
 if __name__ == "__main__":

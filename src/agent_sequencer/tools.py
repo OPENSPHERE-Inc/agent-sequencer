@@ -37,6 +37,13 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from .instance import Instance, InstanceStore
+from .memo import (
+    DEFAULT_INSTANCE_LIMIT as MEMO_DEFAULT_INSTANCE_LIMIT,
+    DEFAULT_VALUE_LIMIT as MEMO_DEFAULT_VALUE_LIMIT,
+    InvalidMemoKey,
+    MemoQuotaExceeded,
+    MemoStore,
+)
 from .persistence import (
     CorruptedLogError,
     EVENT_HEADER,
@@ -73,18 +80,25 @@ def build_server(
     search_paths: list[Path],
     state_dir: Path,
     watch: bool = False,
+    memo_value_limit: int = MEMO_DEFAULT_VALUE_LIMIT,
+    memo_instance_limit: int = MEMO_DEFAULT_INSTANCE_LIMIT,
 ) -> FastMCP:
     """Build the FastMCP server instance, register all tools, and return it.
 
     Args:
-        search_paths: List of program search paths.
-        state_dir:    Directory where JSONL event logs are stored.
-        watch:        When True, detect changes under the program search
-                      paths and auto-reload at the start of
-                      sequencer_list_programs / sequencer_start /
-                      sequencer_resume (throttled). Active instances are
-                      unaffected (the Driver continues using the run_fn it
-                      already captured).
+        search_paths:        List of program search paths.
+        state_dir:           Directory where JSONL event logs are stored.
+        watch:               When True, detect changes under the program
+                             search paths and auto-reload at the start of
+                             sequencer_list_programs / sequencer_start /
+                             sequencer_resume (throttled). Active
+                             instances are unaffected (the Driver
+                             continues using the run_fn it already
+                             captured).
+        memo_value_limit:    Maximum encoded UTF-8 byte size of a single
+                             memo value.
+        memo_instance_limit: Maximum total encoded byte size across all
+                             memo entries for one instance.
     """
     mcp = FastMCP(SERVER_NAME)
 
@@ -96,6 +110,10 @@ def build_server(
 
     registry = ProgramRegistry(search_paths)
     store = InstanceStore()
+    memo = MemoStore(
+        value_limit=memo_value_limit,
+        instance_limit=memo_instance_limit,
+    )
 
     # Throttle state for the terminal-TTL sweep (monotonic time of the
     # last sweep).
@@ -144,6 +162,7 @@ def build_server(
                 continue
             if removed.event_log is not None:
                 removed.event_log.close()
+            memo.clear_instance(inst.instance_id)
             logger.info(
                 "Archived instance after TTL elapsed: id=%s state=%s",
                 inst.instance_id,
@@ -290,6 +309,14 @@ def build_server(
                     f"for_step_no={for_step_no}. "
                     "Call sequencer_current to fetch the current state and resubmit.",
                 )
+
+            # Clear the memo before advancing the Driver so that any
+            # entries written during the previous Instruction's
+            # execution do not leak into the next step. This is what
+            # makes cross-step memo retention structurally impossible
+            # and keeps resume's empty-memo state equivalent to a
+            # never-archived run's state at the same step boundary.
+            memo.clear_instance(instance_id)
 
             if instance.event_log is not None:
                 instance.event_log.append(
@@ -443,6 +470,7 @@ def build_server(
                     store.remove(instance_id)
                     if still_present.event_log is not None:
                         still_present.event_log.close()
+                    memo.clear_instance(instance_id)
                     logger.info(
                         "Archived instance: id=%s",
                         instance_id,
@@ -517,6 +545,100 @@ def build_server(
                 for inst in instances
             ],
         }
+
+    # ----------------------------------------------------------------
+    # sequencer_memo_set / get / keys / delete
+    #
+    # Volatile in-memory KV scoped to one Instruction's execution. The
+    # memo is cleared at the top of every sequencer_next (after the
+    # for_step_no check), so cross-step retention is structurally
+    # impossible. Use it for sub-agent IPC during the current
+    # Instruction; persistent state belongs in files or in the
+    # sequencer program's local variables.
+    # ----------------------------------------------------------------
+    @mcp.tool()
+    async def sequencer_memo_set(
+        instance_id: str, key: str, value: Any
+    ) -> dict[str, Any]:
+        """Store a value in the per-instance memo.
+
+        The entry is dropped when the next sequencer_next call runs (or
+        when the instance is closed / archived), so it cannot be used to
+        carry data across steps. Intended for parallel sub-agents to
+        exchange intermediate JSON during the execution of a single
+        yielded Instruction without round-tripping through the
+        orchestrator's context.
+        """
+        maybe_sweep_terminal()
+        instance = store.get(instance_id)
+        if instance is None:
+            return _not_in_memory_response(state_dir, instance_id)
+        try:
+            size = await memo.set(instance_id, key, value)
+        except InvalidMemoKey as e:
+            return _error("InvalidArgument", str(e))
+        except MemoQuotaExceeded as e:
+            return _error("MemoQuotaExceeded", str(e))
+        except TypeError as e:
+            return _error(
+                "InvalidArgument",
+                f"value is not JSON-serializable: {e}",
+            )
+        return {"ok": True, "size": size}
+
+    @mcp.tool()
+    async def sequencer_memo_get(
+        instance_id: str, key: str
+    ) -> dict[str, Any]:
+        """Read a value from the per-instance memo.
+
+        Returns ``{"ok": true, "exists": false}`` when the key is
+        missing, otherwise ``{"ok": true, "exists": true, "value": ...}``.
+        """
+        maybe_sweep_terminal()
+        instance = store.get(instance_id)
+        if instance is None:
+            return _not_in_memory_response(state_dir, instance_id)
+        try:
+            value, exists = await memo.get(instance_id, key)
+        except InvalidMemoKey as e:
+            return _error("InvalidArgument", str(e))
+        if not exists:
+            return {"ok": True, "exists": False}
+        return {"ok": True, "exists": True, "value": value}
+
+    @mcp.tool()
+    async def sequencer_memo_keys(
+        instance_id: str, prefix: str | None = None
+    ) -> dict[str, Any]:
+        """List keys in the per-instance memo, optionally prefix-filtered.
+
+        Keys are returned in sorted order.
+        """
+        maybe_sweep_terminal()
+        instance = store.get(instance_id)
+        if instance is None:
+            return _not_in_memory_response(state_dir, instance_id)
+        return {"ok": True, "keys": await memo.keys(instance_id, prefix)}
+
+    @mcp.tool()
+    async def sequencer_memo_delete(
+        instance_id: str, key: str
+    ) -> dict[str, Any]:
+        """Delete a key from the per-instance memo.
+
+        Returns ``{"ok": true, "deleted": true}`` when the key existed,
+        ``{"ok": true, "deleted": false}`` otherwise.
+        """
+        maybe_sweep_terminal()
+        instance = store.get(instance_id)
+        if instance is None:
+            return _not_in_memory_response(state_dir, instance_id)
+        try:
+            deleted = await memo.delete(instance_id, key)
+        except InvalidMemoKey as e:
+            return _error("InvalidArgument", str(e))
+        return {"ok": True, "deleted": deleted}
 
     return mcp
 
